@@ -1,0 +1,33 @@
+# ignore stuff
+
+build
+.idea
+.arcconfig
+*.iml
+bin
+*.bin
+*.abi
+/mutagen.sh
+venv
+*.db
+
+
+
+# rust stuff
+*.lock
+
+# misc stuff
+migrations
+build
+test
+truffle-config.js
+test-ledger
+~\$*
+*.swp
+*.swo
+*.swn
+*.swm
+.vscode/*
+
+# system stuff
+.DS_STORE
