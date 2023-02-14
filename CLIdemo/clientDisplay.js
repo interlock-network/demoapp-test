@@ -73,22 +73,22 @@ socket.on('connect', function () { return __awaiter(void 0, void 0, void 0, func
             case 0: return [4 /*yield*/, (0, utils_1.setupSession)('setAuthenticated')];
             case 1:
                 _a = _d.sent(), api = _a[0], contract = _a[1];
-                console.log(color.bold.magenta("ACCESSNFT: ") +
+                console.log(color.bold.magenta("UA-NFT") + color.bold("|CLIENT-APP: ") +
                     color.bold("Reminder... You are responsible for remembering the username password pairs"));
-                console.log(color.bold.magenta("ACCESSNFT: ") +
+                console.log(color.bold.magenta("UA-NFT") + color.bold("|CLIENT-APP: ") +
                     color.bold("associated with each authenticated universal access NFT.\n"));
-                console.log(color.bold.magenta("ACCESSNFT: ") +
+                console.log(color.bold.magenta("UA-NFT") + color.bold("|CLIENT-APP: ") +
                     color.bold("This is because username password pairs are not stored in a traditional database."));
-                console.log(color.bold.magenta("ACCESSNFT: ") +
+                console.log(color.bold.magenta("UA-NFT") + color.bold("|CLIENT-APP: ") +
                     color.bold("We only store the obfuscated anonymized username and password hashes on the blockchain"));
-                console.log(color.bold.magenta("ACCESSNFT: ") +
+                console.log(color.bold.magenta("UA-NFT") + color.bold("|CLIENT-APP: ") +
                     color.bold("for the purpose of comparing the hashes of credentials you provide to our secure restricted"));
-                console.log(color.bold.magenta("ACCESSNFT: ") +
+                console.log(color.bold.magenta("UA-NFT") + color.bold("|CLIENT-APP: ") +
                     color.bold("access area server when you log in.\n"));
                 return [4 /*yield*/, (0, utils_1.hasCollection)(api, contract, CLIENT_ADDRESS)];
             case 2:
                 if (!!(_d.sent())) return [3 /*break*/, 4];
-                console.log(red("ACCESSNFT: ") +
+                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
                     color.bold("This wallet has no universal access NFT collection.") +
                     color.bold("  Please return to main menu to mint.\n"));
                 // if no collection propmt to return to main menu      

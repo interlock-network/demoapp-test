@@ -49,7 +49,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 exports.__esModule = true;
-exports.isValidMnemonic = exports.discoSocket = exports.hasCollection = exports.isValidSubstrateAddress = exports.returnToMain = exports.hexToString = exports.getHash = exports.terminateProcess = exports.sendMicropayment = exports.setupSession = exports.contractDoer = exports.contractGetter = void 0;
+exports.onCancel = exports.isValidMnemonic = exports.discoSocket = exports.hasCollection = exports.isValidSubstrateAddress = exports.returnToMain = exports.hexToString = exports.getHash = exports.terminateProcess = exports.sendMicropayment = exports.setupSession = exports.contractDoer = exports.contractGetter = void 0;
 // imports (anything polkadot with node-js must be required)
 var _a = require('@polkadot/api'), ApiPromise = _a.ApiPromise, WsProvider = _a.WsProvider, Keyring = _a.Keyring;
 var _b = require('@polkadot/api-contract'), ContractPromise = _b.ContractPromise, CodePromise = _b.CodePromise;
@@ -111,14 +111,14 @@ function contractGetter(api, socket, contract, origin, method) {
                             if (OUTPUT.ok.err.hasOwnProperty('custom')) {
                                 // logging custom error
                                 outputerror = hexToString(OUTPUT.ok.err.custom.toString().replace(/0x/, ''));
-                                console.log(red("ACCESSNFT:") +
-                                    " ".concat(outputerror));
+                                console.log(red("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                                    "".concat(outputerror));
                             }
                             else {
                                 // if not custom then print Error enum type
                                 outputerror = OUTPUT.ok.err;
-                                console.log(red("ACCESSNFT:") +
-                                    " ".concat(outputerror));
+                                console.log(red("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                                    "".concat(outputerror));
                             }
                             // send message and signature values to servers
                             socket.emit("".concat(origin, "-").concat(method, "-contract-error"), __spreadArray(__spreadArray([], args, true), [outputerror], false));
@@ -128,8 +128,8 @@ function contractGetter(api, socket, contract, origin, method) {
                     else {
                         // send calling error message
                         outputerror = result.asErr.toHuman();
-                        console.log(red("ACCESSNFT:") +
-                            " ".concat(outputerror));
+                        console.log(red("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                            "".concat(outputerror));
                         socket.emit("".concat(origin, "-").concat(method, "-calling-error"), __spreadArray(__spreadArray([], args, true), [outputerror], false));
                         return [2 /*return*/, [false, false, false, false]];
                     }
@@ -169,8 +169,8 @@ function contractDoer(api, socket, contract, storageMax, refTimeLimit, proofSize
                     // too much gas required?
                     if (gasRequired > gasLimit) {
                         // emit error message with signature values to server
-                        console.log(red("ACCESSNFT:") +
-                            ' tx aborted, gas required is greater than the acceptable gas limit.');
+                        console.log(red("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                            'tx aborted, gas required is greater than the acceptable gas limit.');
                         socket.emit("".concat(origin, "-").concat(method, "-gaslimit"), __spreadArray([], args, true), gasRequired);
                         discoSocket(socket, origin);
                         process.send('gas-limit');
@@ -179,8 +179,8 @@ function contractDoer(api, socket, contract, storageMax, refTimeLimit, proofSize
                     // too much storage required?
                     if (storageDeposit > storageMax) {
                         // emit error message with signature values to server
-                        console.log(red("ACCESSNFT:") +
-                            ' tx aborted, storage required is greater than the acceptable storage limit.');
+                        console.log(red("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                            'tx aborted, storage required is greater than the acceptable storage limit.');
                         socket.emit("".concat(origin, "-").concat(method, "-storagelimit"), __spreadArray([], args, true), storageDeposit);
                         discoSocket(socket, origin);
                         process.send('gas-limit');
@@ -190,13 +190,13 @@ function contractDoer(api, socket, contract, storageMax, refTimeLimit, proofSize
                             // when tx hits block
                             if (result.status.isInBlock) {
                                 // logging
-                                console.log(yellow("ACCESSNFT:") + " ".concat(method, " in a block"));
+                                console.log(yellow("UA-NFT") + color.bold("|BLOCKCHAIN: ") + "".concat(method, " in a block"));
                                 // when tx is finalized in block, tx is successful
                             }
                             else if (result.status.isFinalized) {
                                 // logging and terminate
-                                console.log(green("ACCESSNFT:") +
-                                    color.bold(" ".concat(method, " successful")));
+                                console.log(green("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                                    color.bold("".concat(method, " successful")));
                                 // emit success message with signature values to server
                                 socket.emit("".concat(method, "-complete"), __spreadArray([], args, true));
                                 discoSocket(socket, origin);
@@ -224,18 +224,17 @@ function setupSession(origin) {
                     // setup session
                     //
                     // logging
-                    console.log('');
-                    console.log(blue("ACCESSNFT:") +
-                        " establishing ".concat(origin, " websocket connection with Aleph Zero blockchain..."));
+                    console.log(blue("\nUA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                        color.bold("establishing ".concat(origin, " websocket connection with ") + magenta("Aleph Zero blockchain") + "..."));
                     wsProvider = new WsProvider(WEB_SOCKET);
                     return [4 /*yield*/, ApiPromise.create({ provider: wsProvider })];
                 case 1:
                     API = _a.sent();
                     // logging
-                    console.log(blue("ACCESSNFT:") +
-                        " established ".concat(origin, " websocket connection with Aleph Zero blockchain ") +
-                        cyan("".concat(WEB_SOCKET)));
-                    console.log('');
+                    console.log(blue("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                        color.bold("established ".concat(origin, " secure websocket connection with ") + magenta("Aleph Zero blockchain ")));
+                    console.log(blue("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                        color.bold("at " + cyan("".concat(WEB_SOCKET, "\n"))));
                     CONTRACT = new ContractPromise(API, ACCESS_METADATA, ACCESS_CONTRACT);
                     return [2 /*return*/, [API, CONTRACT]];
             }
@@ -255,19 +254,19 @@ function sendMicropayment(api, wallet, id) {
                     keyring = new Keyring({ type: 'sr25519' });
                     OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
                     // logging transfer intention
-                    console.log(green("ACCESSNFT:") +
-                        color.bold(" wallet contains valid unauthenticated nft: ") + red("ID ".concat(id)));
-                    console.log(yellow("ACCESSNFT:") +
+                    console.log(green("UA-NFT") + color.bold("|AUTH-SERVER: ") +
+                        color.bold("wallet contains valid unauthenticated nft: ") + red("ID ".concat(id)));
+                    console.log(yellow("UA-NFT") + color.bold("|AUTH-SERVER: ") +
                         " sending micro payment to wallet " + magenta("".concat(wallet)));
                     transfer = api.tx.balances.transfer(wallet, AMOUNT);
                     return [4 /*yield*/, transfer.signAndSend(OWNER_PAIR)];
                 case 1:
                     hash = _a.sent();
                     // loggin transfer success
-                    console.log(green("ACCESSNFT:") +
-                        color.bold(" authentication transfer sent"));
-                    console.log(green("ACCESSNFT:") +
-                        " for record, transfer hash is " + magenta("".concat(hash.toHex())));
+                    console.log(green("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                        color.bold("authentication transfer sent"));
+                    console.log(green("UA-NFT") + color.bold("|BLOCKCHAIN: ") +
+                        "for record, transfer hash is " + magenta("".concat(hash.toHex())));
                     return [2 /*return*/, hash.toHex()];
             }
         });
@@ -281,8 +280,8 @@ function terminateProcess(socket, origin, message, values) {
     // emit message to parent process and relay then exit after printing to log
     process.send(message);
     socket.emit(message, values);
-    console.log(blue("ACCESSNFT:") +
-        " ".concat(origin, " socket disconnecting, ID ") + cyan("".concat(socket.id)));
+    console.log(blue("UA-NFT") + color.bold("|SOCKET: ") +
+        "".concat(origin, " socket disconnecting, ID ") + cyan("".concat(socket.id)));
     socket.disconnect();
     process.exit();
 }
@@ -293,7 +292,7 @@ exports.terminateProcess = terminateProcess;
 function getHash(input) {
     var digest = crypto
         .createHash('sha256')
-        .update(input)
+        .update(input !== null && input !== void 0 ? input : '')
         .digest('hex');
     return digest;
 }
@@ -322,7 +321,7 @@ function returnToMain(message) {
                         type: 'select',
                         name: 'return',
                         message: 'Options:',
-                        choices: [{ title: message, value: 'return' }]
+                        choices: [{ title: color.bold(message), value: 'return' }]
                     })];
                 case 1:
                     choice = _a.sent();
@@ -392,8 +391,8 @@ exports.hasCollection = hasCollection;
 // disconnect socket
 //
 function discoSocket(socket, origin) {
-    console.log(blue("ACCESSNFT:") +
-        " ".concat(origin, " socket disconnecting, ID ") + cyan("".concat(socket.id)));
+    console.log(blue("UA-NFT") + color.bold("|AUTH-SERVER: ") +
+        "".concat(origin, " socket disconnecting, ID ") + cyan("".concat(socket.id)));
     socket.disconnect();
 }
 exports.discoSocket = discoSocket;
@@ -407,3 +406,17 @@ function isValidMnemonic(mnemonic) {
     return true;
 }
 exports.isValidMnemonic = isValidMnemonic;
+//
+// prompt cancel action
+//
+var onCancel = function (prompt) {
+    setTimeout(function () {
+        console.clear();
+        console.log(red("\n     YOU ABORTED PROMPT ... RETURNING TO MAIN MENU"));
+        setTimeout(function () {
+            process.send('abort');
+            process.exit();
+        }, 2000);
+    }, 250);
+};
+exports.onCancel = onCancel;

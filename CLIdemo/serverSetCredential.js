@@ -67,8 +67,8 @@ function setCredential(socket, message) {
                     return [4 /*yield*/, (0, utils_1.setupSession)('setCredential')];
                 case 1:
                     _a = _b.sent(), api = _a[0], contract = _a[1];
-                    console.log(green("ACCESSNFT:") +
-                        " setting username and password credentials for NFT " + red("ID ".concat(message.id)));
+                    console.log(green("UA-NFT") + color.bold("|AUTH-SERVER: ") +
+                        "setting username and password credentials for NFT " + red("ID ".concat(message.id)));
                     // call setCredential tx
                     return [4 /*yield*/, (0, utils_1.contractDoer)(api, socket, contract, storageDepositLimit, refTimeLimit, proofSizeLimit, 'setCredential', 'setCredential', { u64: message.id }, '0x' + message.userhash, '0x' + message.passhash)];
                 case 2:
@@ -77,7 +77,7 @@ function setCredential(socket, message) {
                     return [3 /*break*/, 4];
                 case 3:
                     error_1 = _b.sent();
-                    console.log(red("ACCESSNFT: ") + error_1);
+                    console.log(red("UA-NFT") + color.bold("|AUTH-SERVER: ") + error_1);
                     (0, utils_1.discoSocket)(socket, 'setCredential');
                     process.send('setCredential-process-error');
                     process.exit();
@@ -91,8 +91,8 @@ process.on('message', function (message) {
     // setup socket connection with autheticateWallet script
     var socket = (0, socket_io_client_1.io)('http://localhost:3000');
     socket.on('connect', function () {
-        console.log(blue("ACCESSNFT:") +
-            " setCredential socket connected, ID " + cyan("".concat(socket.id)));
+        console.log(blue("UA-NFT") + color.bold("|AUTH-SERVER: ") +
+            "setCredential socket connected, ID " + cyan("".concat(socket.id)));
         setCredential(socket, message)["catch"](function (error) {
             console.error(error);
             process.exit(-1);

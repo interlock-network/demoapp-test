@@ -43,7 +43,8 @@ exports.__esModule = true;
 // child process paths
 var path = require("path");
 var menu = path.resolve('clientMain.js');
-var createWallet = path.resolve('clientAddWallet.js');
+var addWallet = path.resolve('clientAddWallet.js');
+var deleteWallet = path.resolve('clientDeleteWallet.js');
 var mint = path.resolve('clientMint.js');
 var authenticate = path.resolve('clientAuthenticate.js');
 var display = path.resolve('clientDisplay.js');
@@ -52,19 +53,29 @@ var login = path.resolve('clientLogin.js');
 // imports
 var child_process_1 = require("child_process");
 var prompts = require("prompts");
+// specify color formatting
+var color = require("cli-color");
+var red = color.red.bold;
+var green = color.green.bold;
+var blue = color.blue.bold;
+var cyan = color.cyan;
+var yellow = color.yellow.bold;
+var magenta = color.magenta;
+var bold = color.bold;
 // start menu options
 var options = [
-    { title: 'create or add new wallet for this demo application', value: 'add' },
-    { title: 'mint universal access NFT', value: 'mint' },
-    { title: 'register universal access NFT', value: 'authenticate' },
-    { title: 'display universal access NFT collection', value: 'display' },
-    { title: 'login to restricted access area', value: 'login' },
-    { title: 'reset username and password', value: 'reset' },
-    { title: 'quit application', value: 'quit' }
+    { title: bold('create or add new wallet for this demo application'), value: 'add' },
+    { title: bold('mint universal access NFT'), value: 'mint' },
+    { title: bold('register universal access NFT'), value: 'authenticate' },
+    { title: bold('display universal access NFT collection'), value: 'display' },
+    { title: bold('login to restricted access area'), value: 'login' },
+    { title: bold('reset username and password'), value: 'reset' },
+    { title: bold('delete wallet information'), value: 'delete' },
+    { title: bold('quit application'), value: 'quit' }
 ];
 function mainMenu() {
     return __awaiter(this, void 0, void 0, function () {
-        var response, createWalletChild, mintChild, authenticateChild, displayChild, loginChild, resetChild, error_1;
+        var response, addWalletChild, mintChild, authenticateChild, displayChild, loginChild, resetChild, deleteWalletChild, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -73,7 +84,7 @@ function mainMenu() {
                             {
                                 type: 'select',
                                 name: 'choice',
-                                message: '\nUNIVERSAL ACCESS NFT DEMO APP ~ Please choose an action:\n',
+                                message: blue('\nUNIVERSAL ACCESS NFT DEMO APP ~ PLEASE CHOOSE AN ACTION!\n'),
                                 choices: options
                             }
                         ])];
@@ -81,8 +92,8 @@ function mainMenu() {
                     response = _a.sent();
                     switch (response.choice) {
                         case 'add':
-                            createWalletChild = (0, child_process_1.fork)(createWallet);
-                            createWalletChild.on('message', function () {
+                            addWalletChild = (0, child_process_1.fork)(addWallet);
+                            addWalletChild.on('message', function () {
                                 var menuChild = (0, child_process_1.fork)(menu);
                             });
                             break;
@@ -116,9 +127,19 @@ function mainMenu() {
                                 var menuChild = (0, child_process_1.fork)(menu);
                             });
                             break;
-                        case 'quit application':
-                            process.exit();
+                        case 'delete':
+                            deleteWalletChild = (0, child_process_1.fork)(deleteWallet);
+                            deleteWalletChild.on('message', function () {
+                                var menuChild = (0, child_process_1.fork)(menu);
+                            });
                             break;
+                        case 'quit':
+                            console.clear();
+                            console.log(red("\n            GOODBYE!!!\n\n"));
+                            setTimeout(function () {
+                                console.clear();
+                                process.exit();
+                            }, 2500);
                     }
                     return [3 /*break*/, 3];
                 case 2:
@@ -132,12 +153,18 @@ function mainMenu() {
 }
 console.clear();
 console.log("\n");
-console.log("Welcome to the Universal Access NFT demonstration application!\n");
-console.log("The value proposition for this technology is that it is a blockchain secret");
-console.log("(eg, username/passwords) management system (a form of proof of pseudo proof-of-knowledge)");
-console.log("that is extremely resistant to compromise:\n");
-console.log(". At no point in the process are secrets stored in a database in recoverable form.");
-console.log(". Secrets are as vulnerable as the https protocol and cache level security of server and c\n");
-console.log("This is just a proof of concept, containing all the key pieces.");
-console.log("Production implementations are left to the eyes of the beholder.");
+console.log(blue("Welcome to the Universal Access NFT demonstration application!\n"));
+console.log(red("The value of this technology derives from being a blockchain-based secret"));
+console.log(red("management system (eg for usernames/passwords) using NFTs and cryptographic hashing"));
+console.log(red("to establish access permissions and credentials that are extremely resistant to compromise.\n"));
+console.log(yellow(". Access permission secrets or identifying information are never stored in a database or in cleartext."));
+console.log(yellow(". Identifying information and secrets are stored on the blockchain as SHA256 hash digests."));
+console.log(yellow(". Secrets are at most as vulnerable as the https protocol and the root access to RAM "));
+console.log(yellow("  program runtime memory in the server verifying client access permission credentials"));
+console.log(yellow("  (disregarding of course, the case of a compromised client device or phishing attack)."));
+console.log(yellow(". NFTs provide holders with the right to establish access/permission credentials."));
+console.log(yellow(". All stored credential information--all identifying information--is kept secret.\n"));
+console.log(bold.magenta("This is a proof of concept containing all the key pieces."));
+console.log(bold.magenta("Production implementations will vary.\n"));
+console.log(blue("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"));
 mainMenu();

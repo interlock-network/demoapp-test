@@ -60,14 +60,14 @@ var FALSE = '0x66616c7365';
 var OWNER_MNEMONIC = process.env.OWNER_MNEMONIC;
 function credentialCheck(message) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, api, contract, keyring, OWNER_PAIR, gasLimit, _b, gasRequired, storageDeposit, result, output, OUTPUT, RESULT, error, onchainPasshash, error_1;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var _a, api, contract, keyring, OWNER_PAIR, gasLimit, _b, gasRequired, storageDeposit, result, output, OUTPUT, RESULT, error, onchainPasshash, nftId, _c, gasRequired, storageDeposit, result, output, OUTPUT, RESULT, error, authStatus, error_1;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
-                    _c.trys.push([0, 3, , 4]);
+                    _d.trys.push([0, 4, , 5]);
                     return [4 /*yield*/, (0, utils_1.setupSession)('restrictedArea')];
                 case 1:
-                    _a = _c.sent(), api = _a[0], contract = _a[1];
+                    _a = _d.sent(), api = _a[0], contract = _a[1];
                     keyring = new Keyring({ type: 'sr25519' });
                     OWNER_PAIR = keyring.addFromUri(OWNER_MNEMONIC);
                     gasLimit = api.registry.createType('WeightV2', {
@@ -76,7 +76,7 @@ function credentialCheck(message) {
                     });
                     return [4 /*yield*/, contract.query['checkCredential'](OWNER_PAIR.address, { gasLimit: gasLimit }, '0x' + message.userhash)];
                 case 2:
-                    _b = _c.sent(), gasRequired = _b.gasRequired, storageDeposit = _b.storageDeposit, result = _b.result, output = _b.output;
+                    _b = _d.sent(), gasRequired = _b.gasRequired, storageDeposit = _b.storageDeposit, result = _b.result, output = _b.output;
                     OUTPUT = JSON.parse(JSON.stringify(output));
                     RESULT = JSON.parse(JSON.stringify(result));
                     // check if the call was successful
@@ -86,36 +86,71 @@ function credentialCheck(message) {
                             // is this error a custom error?      
                             if (OUTPUT.ok.err.hasOwnProperty('custom')) {
                                 error = OUTPUT.ok.err.custom.toString().replace(/0x/, '');
-                                console.log(red("ACCESSNFT:") +
-                                    " ".concat((0, utils_1.hexToString)(error)));
+                                console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA-SERVER: ") +
+                                    "".concat((0, utils_1.hexToString)(error)));
                                 process.send('bad-username');
                                 process.exit();
                             }
                             else {
                                 // if not custom then print Error enum type
-                                console.log(red("ACCESSNFT:") +
+                                console.log(red("UA-NFT:") +
                                     " ".concat(OUTPUT.ok.err));
                             }
                         }
                     }
                     else {
                         // loggin calling error and terminate
-                        console.log(red("ACCESSNFT:") +
-                            " ".concat(result.asErr.toHuman()));
+                        console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA-SERVER: ") +
+                            "".concat(result.asErr.toHuman()));
                     }
                     onchainPasshash = OUTPUT.ok.ok[0];
+                    nftId = OUTPUT.ok.ok[1];
                     if (onchainPasshash != '0x' + message.passhash) {
                         process.send('bad-password');
                         process.exit();
                     }
+                    return [4 /*yield*/, contract.query['psp34Metadata::getAttribute'](OWNER_PAIR.address, { gasLimit: gasLimit }, { u64: nftId }, ISAUTHENTICATED)];
+                case 3:
+                    _c = _d.sent(), gasRequired = _c.gasRequired, storageDeposit = _c.storageDeposit, result = _c.result, output = _c.output;
+                    OUTPUT = JSON.parse(JSON.stringify(output));
+                    RESULT = JSON.parse(JSON.stringify(result));
+                    // check if the call was successful
+                    if (result.isOk) {
+                        // check if OK result is reverted contract that returned error
+                        if (RESULT.ok.flags == 'Revert') {
+                            // is this error a custom error?      
+                            if (OUTPUT.ok.err.hasOwnProperty('custom')) {
+                                error = OUTPUT.ok.err.custom.toString().replace(/0x/, '');
+                                console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA-SERVER: ") +
+                                    "".concat((0, utils_1.hexToString)(error)));
+                                process.send('bad-username');
+                                process.exit();
+                            }
+                            else {
+                                // if not custom then print Error enum type
+                                console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA-SERVER: ") +
+                                    "".concat(OUTPUT.ok.err));
+                            }
+                        }
+                    }
+                    else {
+                        // loggin calling error and terminate
+                        console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA-SERVER: ") +
+                            "".concat(result.asErr.toHuman()));
+                    }
+                    authStatus = OUTPUT.ok;
+                    if (authStatus == FALSE) {
+                        process.send('not-authenticated');
+                        process.exit();
+                    }
                     process.send('access-granted');
                     process.exit();
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_1 = _c.sent();
-                    console.log(red("ACCESSNFT: ") + error_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 5];
+                case 4:
+                    error_1 = _d.sent();
+                    console.log(red("UA-NFT") + color.bold("|RESTRICTED-AREA-SERVER: ") + error_1);
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
             }
         });
     });

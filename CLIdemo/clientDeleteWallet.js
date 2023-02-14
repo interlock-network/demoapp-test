@@ -1,7 +1,7 @@
 "use strict";
 //
 // INTERLOCK NETWORK & ALEPH ZERO
-// PSP34 UNIVERSAL ACCESS NFT - SERVER MINT
+// PSP34 UNIVERSAL ACCESS NFT - CLIENT DELETE WALLET
 //
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -40,10 +40,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-// imports
-var socket_io_client_1 = require("socket.io-client");
-// utility functions
-var utils_1 = require("./utils");
+var prompts = require("prompts");
+var fs = require("fs");
 // specify color formatting
 var color = require("cli-color");
 var red = color.red.bold;
@@ -52,54 +50,59 @@ var blue = color.blue.bold;
 var cyan = color.cyan;
 var yellow = color.yellow.bold;
 var magenta = color.magenta;
-// constants
-var MAXRETRY = 3;
-// constants
-//
-// null === no limit
-// refTime and proofSize determined by contracts-ui estimation plus fudge-factor
-var refTimeLimit = 8000000000;
-var proofSizeLimit = 180000;
-var storageDepositLimit = null;
-function setAuthenticated(recipient, socket) {
+// utility functions
+var utils_1 = require("./utils");
+var WALLET = JSON.parse(fs.readFileSync('.wallet.json').toString());
+var CLIENT_ADDRESS = WALLET.CLIENT_ADDRESS;
+function deleteWallet() {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, api, contract, error_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _b.trys.push([0, 3, , 4]);
-                    return [4 /*yield*/, (0, utils_1.setupSession)('setAuthenticated')];
-                case 1:
-                    _a = _b.sent(), api = _a[0], contract = _a[1];
-                    console.log(green("UA-NFT") + color.bold("|AUTH-SERVER: ") +
-                        "minting new universal access NFT for recipient " + magenta(" ".concat(recipient, "}")));
-                    // call mint tx
-                    return [4 /*yield*/, (0, utils_1.contractDoer)(api, socket, contract, storageDepositLimit, refTimeLimit, proofSizeLimit, 'mint', 'mint', recipient)];
-                case 2:
-                    // call mint tx
-                    _b.sent();
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_1 = _b.sent();
-                    console.log(red("UA-NFT") + color.bold("|AUTH-SERVER: ") + error_1);
-                    (0, utils_1.discoSocket)(socket, 'serverMint');
-                    process.send('program-error');
-                    process.exit();
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+        var _this = this;
+        return __generator(this, function (_a) {
+            try {
+                console.log(red("\nUA-NFT") + color.bold("|CLIENT-APP: ") +
+                    color.bold("Do you really wish to delete the wallet you associated with account address"));
+                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") +
+                    magenta("".concat(CLIENT_ADDRESS, "\n")) + "?\n");
+                // prompt
+                //
+                // proceed to delete wallet?
+                (function () { return __awaiter(_this, void 0, void 0, function () {
+                    var responseChoice, choice;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, prompts({
+                                    type: 'confirm',
+                                    name: 'choice',
+                                    message: 'Delete wallet?'
+                                })];
+                            case 1:
+                                responseChoice = _a.sent();
+                                choice = responseChoice.choice;
+                                console.log('');
+                                if (choice == false) {
+                                    process.send('done');
+                                    process.exit();
+                                }
+                                fs.writeFileSync('.wallet.json', '');
+                                console.log(green("UA-NFT") + color.bold("|CLIENT-APP: ") +
+                                    color.bold("You deleted your wallet."));
+                                console.log(green("UA-NFT") + color.bold("|CLIENT-APP: ") +
+                                    color.bold("You will need to re-add a wallet if you want to continue using this application.\n"));
+                                return [4 /*yield*/, (0, utils_1.returnToMain)('return to main menu to add new wallet or quit')];
+                            case 2:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                }); })();
             }
+            catch (error) {
+                console.log(red("UA-NFT") + color.bold("|CLIENT-APP: ") + error);
+                process.send('program-error');
+                process.exit();
+            }
+            return [2 /*return*/];
         });
     });
 }
-process.on('message', function (wallet) {
-    // setup socket connection with autheticateWallet script
-    var socket = (0, socket_io_client_1.io)('http://localhost:3000');
-    socket.on('connect', function () {
-        console.log(blue("UA-NFT") + color.bold("|AUTH-SERVER: ") +
-            "setAuthenticated socket connected, ID " + cyan("".concat(socket.id)));
-        setAuthenticated(wallet, socket)["catch"](function (error) {
-            console.error(error);
-            process.exit(-1);
-        });
-    });
-});
+deleteWallet();
